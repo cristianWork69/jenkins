@@ -19,7 +19,7 @@ spec:
     hostPath:
       path: /var/run/docker.sock
 """
-    defaultContainer 'gcloud'
+    defaultContainer 'docker'
     }
   }
 
