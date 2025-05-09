@@ -7,7 +7,7 @@ kind: Pod
 spec:
   containers:
   - name: docker
-    image: gcr.io/google.com/cloudsdktool/cloud-sdk:latest
+    image: docker:20.10.24-cli
     command:
     - cat
     tty: true
@@ -23,7 +23,6 @@ spec:
     }
   }
 
-
   environment {
     IMAGE_TAG = "${env.BRANCH_NAME}"
     COLOR = "green"
@@ -37,15 +36,15 @@ spec:
       }
     }
 
-   stage('Auth & Docker Build') {
+    stage('Auth & Docker Build') {
       steps {
         withCredentials([file(credentialsId: 'gcp-jenkins', variable: 'GCLOUD_KEY')]) {
           sh """
           gcloud auth activate-service-account --key-file=$GCLOUD_KEY
           gcloud config set project $PROJECT_ID
-          gcloud auth configure-docker
-          docker build -t gcr.io/$PROJECT_ID/myapp:$IMAGE_TAG .
-          docker push gcr.io/$PROJECT_ID/myapp:$IMAGE_TAG
+          gcloud auth configure-docker europe-west3-docker.pkg.dev
+          docker build -t europe-west3-docker.pkg.dev/$PROJECT_ID/my-docker-repo/myapp:$IMAGE_TAG .
+          docker push europe-west3-docker.pkg.dev/$PROJECT_ID/my-docker-repo/myapp:$IMAGE_TAG
           """
         }
       }
