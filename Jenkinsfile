@@ -7,7 +7,7 @@ kind: Pod
 spec:
   containers:
   - name: docker
-    image: docker:20.10.24-cli
+    image:
     command:
     - cat
     tty: true
@@ -37,13 +37,17 @@ spec:
       }
     }
 
-    stage('Build & Push') {
+   stage('Auth & Docker Build') {
       steps {
-        sh """
-        docker build -t gcr.io/$PROJECT_ID/myapp:$IMAGE_TAG .
-        gcloud auth configure-docker
-        docker push gcr.io/$PROJECT_ID/myapp:$IMAGE_TAG
-        """
+        withCredentials([file(credentialsId: 'gcp-jenkins', variable: 'GCLOUD_KEY')]) {
+          sh """
+          gcloud auth activate-service-account --key-file=$GCLOUD_KEY
+          gcloud config set project $PROJECT_ID
+          gcloud auth configure-docker
+          docker build -t gcr.io/$PROJECT_ID/myapp:$IMAGE_TAG .
+          docker push gcr.io/$PROJECT_ID/myapp:$IMAGE_TAG
+          """
+        }
       }
     }
 
